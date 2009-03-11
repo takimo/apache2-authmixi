@@ -1,0 +1,27 @@
+This is Perl module Apache2::AuthMixi.
+
+INSTALLATION
+
+Apache2::AuthMixi installation is straightforward. If your CPAN shell is set up,
+you should just be able to do
+
+    % cpan Apache2::AuthMixi
+
+Download it, unpack it, then build it as per the usual:
+
+    % perl Makefile.PL
+    % make && make test
+
+Then install it:
+
+    % make install
+
+DOCUMENTATION
+
+Apache2::AuthMixi documentation is available as in POD. So you can do:
+
+    % perldoc Apache2::AuthMixi
+
+to read the documentation online with your favorite pager.
+
+Shinya Takimoto
