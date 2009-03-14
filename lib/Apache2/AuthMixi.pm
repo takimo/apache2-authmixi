@@ -41,28 +41,28 @@ $ENV{HTTPS_CA_DIR} = '/etc/ssl/certs';
 
 my @directives = (
     {
-        name            => 'ReturnTo',
+        name            => 'MixiAuthReturnTo',
         req_override    => Apache2::Const::OR_AUTHCFG,
         args_how        => Apache2::Const::TAKE1,
-        errmsg          => 'ReturnTo http://sample.com/trust_root/callback',
+        errmsg          => 'MixiAuthReturnTo http://sample.com/trust_root/callback',
     },
     {
-        name            => 'TrustRoot',
+        name            => 'MixiAuthTrustRoot',
         req_override    => Apache2::Const::OR_AUTHCFG,
         args_how        => Apache2::Const::TAKE1,
-        errmsg          => 'TrustRoot http://sample.com/trust_root/',
+        errmsg          => 'MixiAuthTrustRoot http://sample.com/trust_root/',
     },
     {
-        name            => 'ConsumerSecret',
+        name            => 'MixiAuthSecret',
         req_override    => Apache2::Const::OR_AUTHCFG,
         args_how        => Apache2::Const::TAKE1,
-        errmsg          => 'ConsumerSecret "Your consumer secret goes here"',
+        errmsg          => 'MixiAuthSecret "Your consumer secret goes here"',
     },
     {
-        name            => 'RequireRelation',
+        name            => 'MixiAuthType',
         req_override    => Apache2::Const::OR_AUTHCFG,
         args_how        => Apache2::Const::TAKE2,
-        errmsg          => 'RequireRelation community [community_id]',
+        errmsg          => 'MixiAuthType community [community_id]',
     },
 );
 
@@ -73,22 +73,22 @@ eval {
     );
 };
 
-sub ReturnTo {
+sub MixiAuthReturnTo {
     my ($self, $params, $arg) = @_;
     $self->{'return_to'} = $arg;
 }
 
-sub TrustRoot {
+sub MixiAuthTrustRoot {
     my ($self, $params, $arg) = @_;
     $self->{'trust_root'} = $arg;
 }
 
-sub ConsumerSecret {
+sub MixiAuthSecret {
     my ($self, $params, $arg) = @_;
-    $self->{'consumer_secret'} = $arg;
+    $self->{'mixi_auth_secret'} = $arg;
 }
 
-sub RequireRelation {
+sub MixiAuthType {
     my ($self, $params, %arg) = @_;
     ($self->{'type'}, $self->{'id'}) = each %arg;
 }
@@ -102,7 +102,7 @@ sub authen_handler {
     }
     # check cookie by token
     my ($identity, $nickname, $token, $time) = $cookie{"Apache2-AuthMixi"}->value;
-    if (Digest::MD5::md5_hex($identity.$nickname.$config->{'consumer_secret'}.$time) ne $token){
+    if (Digest::MD5::md5_hex($identity.$nickname.$config->{'mixi_auth_secret'}.$time) ne $token){
         return &process_authen($request);
     }
     return Apache2::Const::DECLINED;
@@ -138,12 +138,12 @@ sub process_authen {
 sub success_authz {
     my ($r, $cf, $vident) = @_;
     my $return_url = $cf->{'return_to'};
-    my $consumer_secret = $cf->{'consumer_secret'};
+    my $mixi_auth_secret = $cf->{'mixi_auth_secret'};
     my $identity = $vident->{'identity'};
     my $nickname = $vident->{'sreg.nickname'} || "";
     my $time = time() + TIMEOUT;
     my $expires = time2str($time);
-    my $token = Digest::MD5::md5_hex($identity.$nickname.$consumer_secret.$time);
+    my $token = Digest::MD5::md5_hex($identity.$nickname.$mixi_auth_secret.$time);
     my $cookie = Apache2::Cookie->new($r,
         -name => "Apache2-AuthMixi",
         -value => [ $identity, $nickname, $token, $time ],
@@ -200,14 +200,14 @@ Apache2::AuthMixi - Authentication library uses Mixi OpenID
 =head1 SYNOPSIS
 
     # admin setting apache config
+    LoadModule perl_module modules/mod_perl.so
     PerlModule Apache2::AuthMixi
 
     # user setting .htaccess 
-    AuthTyep        Mixi
-    TrustRoot       http://example.com/user/path/
-    ReturnTo        http://exmaple.com/user/return/to
-    ConsumerSecret  1ji3fnwlr8dhl36s9
-    RequireRelation communiry 145643
+    MixiAuthType        communiry 145643
+    MixiAuthTrustRoot   http://example.com/user/path/
+    MixiAuthReturnTo    http://exmaple.com/user/return/to
+    MixiAuthSecret      1ji3fnwlr8dhl36s9
 
 =head1 LIMITATION
 
