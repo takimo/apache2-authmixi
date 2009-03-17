@@ -2,7 +2,8 @@ package Apache2::AuthMixi;
 use strict;
 use warnings;
 use 5.00800;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
+
 use Apache2::Access;
 use Apache2::Cookie;
 use Apache2::Const -compile => qw(
@@ -37,7 +38,7 @@ my $extensions = {
     }
 };
 
-$ENV{HTTPS_CA_DIR} = '/etc/ssl/certs';
+#$ENV{HTTPS_CA_DIR} = '/etc/ssl/certs';
 
 my @directives = (
     {
@@ -96,6 +97,13 @@ sub MixiAuthType {
 sub authen_handler {
     my $request = shift;
     my $config = Apache2::Module::get_config(__PACKAGE__, $request->server, $request->per_dir_config);
+    if(!$config->{'mixi_auth_secret'})
+    {
+        my $server = $request->server;
+        $server->log_error($config->{'return_to'});
+        #return Apache2::Const::DECLINED;
+        return Apache2::Const::OK;
+    }
     my %cookie = Apache2::Cookie->fetch($request);
     unless(%cookie && $cookie{"Apache2-AuthMixi"}){
         return &process_authen($request);

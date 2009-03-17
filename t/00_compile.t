@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use lib("/home/takimo/Dropbox/Code/Apache2-AuthMixi/trunk/lib/");
+BEGIN { $ENV{PERL_DL_NONLAZY} = 0; }
 use Test::More tests => 1;
 
 BEGIN { use_ok 'Apache2::AuthMixi' }
