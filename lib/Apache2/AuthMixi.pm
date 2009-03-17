@@ -38,8 +38,6 @@ my $extensions = {
     }
 };
 
-#$ENV{HTTPS_CA_DIR} = '/etc/ssl/certs';
-
 my @directives = (
     {
         name            => 'MixiAuthReturnTo',
@@ -97,10 +95,11 @@ sub MixiAuthType {
 sub authen_handler {
     my $request = shift;
     my $config = Apache2::Module::get_config(__PACKAGE__, $request->server, $request->per_dir_config);
+    my $server = $request->server;
+    $server->log_error($config->{'return_to'});
     if(!$config->{'mixi_auth_secret'})
     {
-        my $server = $request->server;
-        $server->log_error($config->{'return_to'});
+        #$server->log_error($config->{'return_to'});
         #return Apache2::Const::DECLINED;
         return Apache2::Const::OK;
     }
@@ -210,6 +209,7 @@ Apache2::AuthMixi - Authentication library uses Mixi OpenID
     # admin setting apache config
     LoadModule perl_module modules/mod_perl.so
     PerlModule Apache2::AuthMixi
+    PerlSetEnv HTTPS_CA_DIR /etc/ssl/certs;
 
     # user setting .htaccess 
     MixiAuthType        communiry 145643
