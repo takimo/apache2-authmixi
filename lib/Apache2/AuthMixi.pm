@@ -16,8 +16,7 @@ use Apache2::RequestRec;
 use Apache2::ServerRec;
 use Apache2::ServerUtil;
 use HTTP::Date;
-use Digest::MD5;
-#use Digest::SHA1;
+use Digest::SHA1;
 use LWP::UserAgent;
 use Net::OpenID::Consumer::Lite;
 
@@ -109,7 +108,7 @@ sub authen_handler {
     }
     # check cookie by token
     my ($identity, $nickname, $token, $time) = $cookie{"Apache2-AuthMixi"}->value;
-    if (Digest::MD5::md5_hex($identity.$nickname.$config->{'mixi_auth_secret'}.$time) ne $token){
+    if (Digest::SHA1::sha1_hex($identity.$nickname.$config->{'mixi_auth_secret'}.$time) ne $token){
         return &process_authen($request);
     }
     return Apache2::Const::DECLINED;
@@ -150,7 +149,7 @@ sub success_authz {
     my $nickname = $vident->{'sreg.nickname'} || "";
     my $time = time() + TIMEOUT;
     my $expires = time2str($time);
-    my $token = Digest::MD5::md5_hex($identity.$nickname.$mixi_auth_secret.$time);
+    my $token = Digest::SHA1::sha1_hex($identity.$nickname.$mixi_auth_secret.$time);
     my $cookie = Apache2::Cookie->new($r,
         -name => "Apache2-AuthMixi",
         -value => [ $identity, $nickname, $token, $time ],
@@ -197,8 +196,6 @@ sub process_forbidden {
 
 1;
 __END__
-
-=encoding utf8
 
 =head1 NAME
 
