@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::More tests => 2;
-use Test::MockObject;
+use t::TestAuthMixi;
 
 my %Configuration;
 my %Parameters;
@@ -24,23 +24,6 @@ my %Cookie;
     }
 }
 
-sub create_request {
-    my ($headers_out_ref) = @_;
-
-    my $result = Test::MockObject->new;
-    $result->mock(
-        headers_out => sub {
-            Test::MockObject->new->mock(
-                set => sub {
-                    my ($self, $key, $value) = @_;
-                    $headers_out_ref->{$key} = $value;
-                }
-            );
-        }
-    );
-    return $result;
-}
-
 my $handler = AuthMixi->new;
 Apache2::AuthMixi::MixiAuthType(\%Configuration, undef, community => 145643);
 Apache2::AuthMixi::MixiAuthTrustRoot(\%Configuration, undef, 'http://example.com/user/path/');
@@ -48,14 +31,15 @@ Apache2::AuthMixi::MixiAuthReturnTo(\%Configuration, undef, 'http://example.com/
 Apache2::AuthMixi::MixiAuthSecret(\%Configuration, undef, '1ji3fnwlr8dhl36s9');
 
 my %headers_out;
+my $req = t::TestAuthMixi::create_request(\%headers_out);
 
 is(
-    $handler->authen_handler(create_request(\%headers_out)),
+    $handler->authen_handler($req),
     Apache2::Const::REDIRECT,
     'status code'
 );
 is_deeply(
     \%headers_out,
-    { Location => 'https://mixi.jp/openid_server.pl?openid.ns.e1=http%3A%2F%2Fopenid.net%2Fextensions%2Fsreg%2F1.1&openid.mode=checkid_immediate&openid.e1.required=nickname&openid.return_to=http%3A%2F%2Fexample.com%2Fuser%2Freturn%2Fto' },
+    { Location => 'https://mixi.jp/openid_server.pl?openid.e2.required=nickname&openid.e1.claimed_id=https%3A%2F%2Fid.mixi.jp%2Fcommunity%2F145643&openid.ns.e1=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_immediate&openid.return_to=http%3A%2F%2Fexample.com%2Fuser%2Freturn%2Fto&openid.ns.e2=http%3A%2F%2Fopenid.net%2Fextensions%2Fsreg%2F1.1' },
     'response header'
 );
