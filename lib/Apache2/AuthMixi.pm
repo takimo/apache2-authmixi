@@ -67,7 +67,7 @@ my @directives = (
 eval {
     Apache2::Module::add(__PACKAGE__, \@directives);
     Apache2::ServerUtil->server->push_handlers(
-        PerlAccessHandler => \&authen_handler
+        PerlAccessHandler => \&_authen_handler
     );
 };
 
@@ -92,8 +92,9 @@ sub MixiAuthType {
 }
 
 sub authen_handler {
-    my $request = shift;
-    my $config = Apache2::Module::get_config(__PACKAGE__, $request->server, $request->per_dir_config);
+    my ($self, $request) = @_;
+    my $config = $self->configuration_of($request);
+
     my $server = $request->server;
     $server->log_error($config->{'return_to'});
     if(!$config->{'mixi_auth_secret'})
@@ -102,24 +103,24 @@ sub authen_handler {
         #return Apache2::Const::DECLINED;
         return Apache2::Const::OK;
     }
-    my %cookie = Apache2::Cookie->fetch($request);
+
+    my %cookie = $self->cookie_of($request);
     unless(%cookie && $cookie{"Apache2-AuthMixi"}){
-        return &process_authen($request);
+        return $self->process_authen($request);
     }
     # check cookie by token
     my ($identity, $nickname, $token, $time) = $cookie{"Apache2-AuthMixi"}->value;
     if (Digest::SHA1::sha1_hex($identity.$nickname.$config->{'mixi_auth_secret'}.$time) ne $token){
-        return &process_authen($request);
+        return $self->process_authen($request);
     }
     return Apache2::Const::DECLINED;
 }
 
 sub process_authen {
     # handle response of OP
-    my $request = shift;
-    my $config = Apache2::Module::get_config(__PACKAGE__, $request->server, $request->per_dir_config);
-    my $apr = Apache2::Request->new($request);
-    my $param = { %{ $apr->param || {} } };
+    my ($self, $request) = @_;
+    my $config = $self->configuration_of($request);
+    my $param = { $self->parameters_of($request) };
     Net::OpenID::Consumer::Lite->handle_server_response($param,
         not_openid => sub {
             return &check_id($request, $config);
@@ -192,6 +193,42 @@ sub redirect_setup {
 
 sub process_forbidden {
     return Apache2::Const::FORBIDDEN;
+}
+
+sub new {
+    my ($class) = @_;
+    return bless {}, $class;
+}
+
+sub _authen_handler {
+    my $request = shift;
+
+    my $self = __PACKAGE__->new;
+    $self->authen_handler($request);
+}
+
+sub cookie_of {
+    my ($self, $request) = @_;
+
+    my %cookie = Apache2::Cookie->fetch($request);
+    return %cookie;
+}
+
+sub configuration_of {
+    my ($self, $request) = @_;
+
+    return Apache2::Module::get_config(
+        __PACKAGE__,
+        $request->server,
+        $request->per_dir_config
+    );
+}
+
+sub parameters_of {
+    my ($self, $request) = @_;
+
+    my $apr = Apache2::Request->new($request);
+    return %{ $apr->param || {} };
 }
 
 1;
