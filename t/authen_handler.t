@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::More tests => 2;
-use t::TestAuthMixi;
+use t::AuthMixi;
 
 my %Configuration;
 my %Parameters;
@@ -31,7 +31,7 @@ Apache2::AuthMixi::MixiAuthReturnTo(\%Configuration, undef, 'http://example.com/
 Apache2::AuthMixi::MixiAuthSecret(\%Configuration, undef, '1ji3fnwlr8dhl36s9');
 
 my %headers_out;
-my $req = t::TestAuthMixi::create_request(\%headers_out);
+my $req = t::AuthMixi::create_request(\%headers_out);
 
 is(
     $handler->authen_handler($req),

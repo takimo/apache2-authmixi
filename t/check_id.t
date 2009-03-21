@@ -1,7 +1,7 @@
 use strict;
 use warnings;
-use Test::More tests => 4;
-use t::TestAuthMixi;
+use Test::More tests => 6;
+use t::AuthMixi;
 use Apache2::AuthMixi;
 
 my %config;
@@ -10,7 +10,7 @@ Apache2::AuthMixi::MixiAuthReturnTo(\%config, undef, 'http://example.com/user/re
 my %headers;
 my $req;
 
-$req = t::TestAuthMixi::create_request(\%headers);
+$req = t::AuthMixi::create_request(\%headers);
 is(
     Apache2::AuthMixi::check_id($req, \%config),
     Apache2::Const::REDIRECT,
@@ -23,7 +23,7 @@ is_deeply(
 );
 
 Apache2::AuthMixi::MixiAuthType(\%config, undef, community => 145643);
-$req = t::TestAuthMixi::create_request(\%headers);
+$req = t::AuthMixi::create_request(\%headers);
 is(
     Apache2::AuthMixi::check_id($req, \%config),
     Apache2::Const::REDIRECT,
@@ -36,7 +36,7 @@ is_deeply(
 );
 
 Apache2::AuthMixi::MixiAuthType(\%config, undef, user => 1);
-$req = t::TestAuthMixi::create_request(\%headers);
+$req = t::AuthMixi::create_request(\%headers);
 is(
     Apache2::AuthMixi::check_id($req, \%config),
     Apache2::Const::REDIRECT,
