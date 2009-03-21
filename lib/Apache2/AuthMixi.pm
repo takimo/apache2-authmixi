@@ -246,7 +246,7 @@ Apache2::AuthMixi - Authentication library uses Mixi OpenID
     PerlSetEnv HTTPS_CA_DIR /etc/ssl/certs;
 
     # user setting .htaccess 
-    MixiAuthType        communiry 145643
+    MixiAuthType        community 145643
     MixiAuthTrustRoot   http://example.com/user/path/
     MixiAuthReturnTo    http://exmaple.com/user/return/to
     MixiAuthSecret      1ji3fnwlr8dhl36s9
