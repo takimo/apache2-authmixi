@@ -231,7 +231,7 @@ Shinya Takimoto E<lt>subtakimo@gmail.comE<gt>
 =head1 SEE ALSO
 
 OpenID website: http://openid.net/
-Mixi OpenID website: http://developer.mixi.co.jp/
+Mixi OpenID website: http://developer.mixi.co.jp/openid
 
 L<Net::OpenID::Consumer>
 L<Net::OpenID::Consumer::Lite>
