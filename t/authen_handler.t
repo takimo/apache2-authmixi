@@ -3,32 +3,13 @@ use warnings;
 use Test::More tests => 2;
 use t::AuthMixi;
 
-my %Configuration;
-my %Parameters;
-my %Cookie;
+my %config;
+Apache2::AuthMixi::MixiAuthType(\%config, undef, community => 145643);
+Apache2::AuthMixi::MixiAuthTrustRoot(\%config, undef, 'http://example.com/user/path/');
+Apache2::AuthMixi::MixiAuthReturnTo(\%config, undef, 'http://example.com/user/return/to');
+Apache2::AuthMixi::MixiAuthSecret(\%config, undef, '1ji3fnwlr8dhl36s9');
 
-{
-    package AuthMixi;
-    use base qw(Apache2::AuthMixi);
-
-    sub configuration_of {
-        \%Configuration;
-    }
-
-    sub cookie_of {
-        %Cookie;
-    }
-
-    sub parameters_of {
-        %Parameters;
-    }
-}
-
-my $handler = AuthMixi->new;
-Apache2::AuthMixi::MixiAuthType(\%Configuration, undef, community => 145643);
-Apache2::AuthMixi::MixiAuthTrustRoot(\%Configuration, undef, 'http://example.com/user/path/');
-Apache2::AuthMixi::MixiAuthReturnTo(\%Configuration, undef, 'http://example.com/user/return/to');
-Apache2::AuthMixi::MixiAuthSecret(\%Configuration, undef, '1ji3fnwlr8dhl36s9');
+my $handler = t::AuthMixi->new(\%config);
 
 my %headers_out;
 my $req = t::AuthMixi::create_request(\%headers_out);

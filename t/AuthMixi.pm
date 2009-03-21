@@ -9,8 +9,8 @@ sub new {
 
     my $self = $class->SUPER::new;
     $self->{configuration} = $config_ref;
-    $self->{cookie}        = $cookie_ref;
-    $self->{parameters}    = $params_ref;
+    $self->{cookie}        = $cookie_ref || {};
+    $self->{parameters}    = $params_ref || {};
 
     return $self;
 }
