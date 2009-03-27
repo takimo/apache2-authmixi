@@ -22,13 +22,14 @@ use Net::OpenID::Consumer::Lite;
 
 use constant {
     # auth limit time
-    TIMEOUT => 3600,
+    TIMEOUT     => 3600,
     # relation type
-    USER => 'user',
-    COMMUNITY => 'community',
+    USER        => 'user',
+    COMMUNITY   => 'community',
     # openid server & namespace
-    MIXI_OP => 'https://mixi.jp/openid_server.pl',
-    SELECT_ID => 'http://specs.openid.net/auth/2.0/identifier_select',
+    MIXI_OP     => 'https://mixi.jp/openid_server.pl',
+    SELECT_ID   => 'http://specs.openid.net/auth/2.0/identifier_select',
+    CADIR       => '/etc/ssl/certs',
 };
 
 my $extensions = {
@@ -96,11 +97,8 @@ sub authen_handler {
     my $config = $self->configuration_of($request);
 
     my $server = $request->server;
-    $server->log_error($config->{'return_to'});
     if(!$config->{'mixi_auth_secret'})
     {
-        #$server->log_error($config->{'return_to'});
-        #return Apache2::Const::DECLINED;
         return Apache2::Const::OK;
     }
 
@@ -121,6 +119,13 @@ sub process_authen {
     my ($self, $request) = @_;
     my $config = $self->configuration_of($request);
     my $param = { $self->parameters_of($request) };
+    my $cadir = $ENV{HTTPS_CA_DIR};
+    local $ENV{HTTPS_CA_DIR};
+    if ($cadir) {
+      $ENV{HTTPS_CA_DIR} = $cadir;
+    } elsif (-d CADIR) {
+      $ENV{HTTPS_CA_DIR} = CADIR;
+    }
     Net::OpenID::Consumer::Lite->handle_server_response($param,
         not_openid => sub {
             return &check_id($request, $config);
@@ -243,7 +248,7 @@ Apache2::AuthMixi - Authentication library uses Mixi OpenID
     # admin setting apache config
     LoadModule perl_module modules/mod_perl.so
     PerlModule Apache2::AuthMixi
-    PerlSetEnv HTTPS_CA_DIR /etc/ssl/certs;
+    PerlSetEnv HTTPS_CA_DIR /etc/ssl/certs
 
     # user setting .htaccess 
     MixiAuthType        community 145643
