@@ -122,9 +122,9 @@ sub process_authen {
     my $cadir = $ENV{HTTPS_CA_DIR};
     local $ENV{HTTPS_CA_DIR};
     if ($cadir) {
-      $ENV{HTTPS_CA_DIR} = $cadir;
+        $ENV{HTTPS_CA_DIR} = $cadir;
     } elsif (-d CADIR) {
-      $ENV{HTTPS_CA_DIR} = CADIR;
+        $ENV{HTTPS_CA_DIR} = CADIR;
     }
     Net::OpenID::Consumer::Lite->handle_server_response($param,
         not_openid => sub {
