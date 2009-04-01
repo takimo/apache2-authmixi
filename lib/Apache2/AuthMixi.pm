@@ -241,7 +241,7 @@ __END__
 
 =head1 NAME
 
-Apache2::AuthMixi - Authentication library uses Mixi OpenID 
+Apache2::AuthMixi - Authentication library using mixi OpenID 
 
 =head1 SYNOPSIS
 
@@ -256,24 +256,27 @@ Apache2::AuthMixi - Authentication library uses Mixi OpenID
     MixiAuthReturnTo    http://exmaple.com/user/return/to
     MixiAuthSecret      1ji3fnwlr8dhl36s9
 
-=head1 LIMITATION
-
-    this module supports Mixi OpenID only.
-
 =head1 DESCRIPTION
 
-Apache2::AuthMixi is Authentication library that use Mixi OpenID.
+This mod_perl module allows you to implement "my mixi authentication" and "community authentication" with mixi OpenID.
+
+"my mixi" is a term which means a friend of a mixi user.
 
 This module depend to L<Net::OpenID::Consumer::Lite>.
 
+=head1 LIMITATION
+
+    this module supports mixi OpenID only.
+    
 =head1 AUTHOR
 
 Shinya Takimoto E<lt>subtakimo@gmail.comE<gt>
 
 =head1 SEE ALSO
 
+mixi website: http://mixi.jp
+mixi OpenID website: http://developer.mixi.co.jp/openid
 OpenID website: http://openid.net/
-Mixi OpenID website: http://developer.mixi.co.jp/openid
 
 L<Net::OpenID::Consumer>
 L<Net::OpenID::Consumer::Lite>
